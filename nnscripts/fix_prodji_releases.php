@@ -1,6 +1,6 @@
 <?php
 /**
- * Fix mallformed android releases
+ * Fix mallformed PRoDJi movie releases
  *
  * @author    NN Scripts
  * @license   http://opensource.org/licenses/MIT MIT License
@@ -21,15 +21,15 @@ require_once(WWW_DIR ."/lib/sphinx.php");
 
 
 /**
- * Remove releases which do not match black or whitelists
+ * Fix PRoDJi releases
  */
-class fix_android_releases extends NNScripts
+class fix_prodji_releases extends NNScripts
 {
     /**
      * The script name
      * @var string
      */
-    protected $scriptName = 'Fix malformed android releases';
+    protected $scriptName = 'Fix PRoDJi releases';
     
     /**
      * The script version
@@ -96,7 +96,7 @@ class fix_android_releases extends NNScripts
         // No releases to fix
         if( false === $this->fixed )
         {
-            $this->display( "No android releases to fix". PHP_EOL );
+            $this->display( "No PRoDJi releases to fix". PHP_EOL );
         }
     }
     
@@ -108,15 +108,19 @@ class fix_android_releases extends NNScripts
      */
     protected function getReleases()
     {
-        $sql = "SELECT r.ID, r.name,
-                REPLACE(rf.name, '.apk', '') AS filename
-                FROM releases r
-                LEFT JOIN releasefiles rf ON (rf.releaseID = r.ID)
-                WHERE r.name REGEXP '^[v]?[0-9]+([\\s\\.][0-9]+)+(-(Game|Pro))?-AnDrOiD$'";
-        if( null !== $this->settings['limit'] )
+        $sql = "SELECT r.ID, r.name, rf.name AS filename
+                FROM `releases` r
+                INNER JOIN `category` c ON (c.id = r.categoryID)
+                INNER JOIN `releasefiles` rf ON (rf.releaseID = r.ID)
+                WHERE r.name REGEXP '^HD[0-9]{5}.*PRoDJi(\.Dual)?$'
+                AND c.parentID = '2000'
+                AND rf.name REGEXP '\.mkv$'";
+        if( is_numeric( $this->settings['limit'] ) && 0 < $this->settings['limit'] )
         {
             $sql .= sprintf( ' AND r.adddate >= "%s" - INTERVAL %s HOUR', $this->settings['now'], $this->settings['limit'] );
         }                     
+        $sql .= " GROUP BY r.ID";
+
         $releases = $this->db->query( $sql );
         if( is_array( $releases ) && 0 < count( $releases ) )
         {
@@ -137,17 +141,25 @@ class fix_android_releases extends NNScripts
         $this->fixed = false;
         
         // Build the check regex
-        $regex = sprintf( '/%s$/i',preg_quote( $release['name'] ) );
-        if( preg_match( $regex, $release['filename'] ) )
+        $newName = substr( $release['filename'], 0, -4 );
+        if( false !== $newName )
         {
+            // Fix name
+            if( preg_match( '/[0-9]{4}[\s\.]BluRay/', $newName ) )
+            {
+                $pattern = '/([0-9]{4})([\s\.])BluRay/';
+                $replacement = '(${1})${2}BluRay';
+                $newName = preg_replace( $pattern, $replacement, $newName );
+            }
+
             // Update
             $this->fixed = true;
-            $this->display( sprintf( 'Fixing release: %s'. PHP_EOL, $release['filename'] ) );
+            $this->display( sprintf( 'Renaming release: [%s] to [%s]'. PHP_EOL, $release['name'], str_replace( '.', ' ', $newName ) ) );
             
             $updateSql = sprintf(
                 'UPDATE releases r SET r.name = %s, r.searchname = %s WHERE r.id = %d',
-                $this->db->escapeString( str_replace( '.', ' ', $release['filename'] ) ),
-                $this->db->escapeString( $release['filename'] ),
+                $this->db->escapeString( str_replace( '.', ' ', $newName ) ),
+                $this->db->escapeString( $newName ),
                 (int)$release['ID']
             );
             $this->db->query( $updateSql );
@@ -162,10 +174,9 @@ try
     $sphinx = new Sphinx();
 
     // Load the blacklistReleases class
-    $blr = new fix_android_releases();
-    $blr->fix();
+    $fpr = new fix_prodji_releases();
+    $fpr->fix();
 
 } catch( Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
-
 }

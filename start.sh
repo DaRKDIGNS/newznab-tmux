@@ -54,17 +54,17 @@ else
     $TMUXCMD splitw -v -p 67 'printf "\033]2;import-nzb\033\\"'
     $TMUXCMD splitw -v -p 50 'printf "\033]2;update_releases\033\\"'
 
-    $TMUXCMD new-window -n other 'printf "\033]2;update_predb\033\\"'
-    $TMUXCMD splitw -h -p 50 'printf "\033]2;optimise\033\\"'
-    $TMUXCMD selectp -t 0
-    $TMUXCMD splitw -v -p 75 'printf "\033]2;update_parsing\033\\"'
-    $TMUXCMD splitw -v -p 67 'printf "\033]2;update_cleanup\033\\"'
-    $TMUXCMD splitw -v -p 50 'printf "\033]2;update_tv\033\\"'
-    $TMUXCMD selectp -t 4
-    $TMUXCMD splitw -v -p 75 'printf "\033]2;sphinx\033\\"'
-    $TMUXCMD splitw -v -p 67 'printf "\033]2;delete_parts\033\\"'
-    $TMUXCMD splitw -v -p 50 'printf "\033]2;update_missing_movie_info\033\\"'
-
+    $TMUXCMD new-window -n other 'printf "\033]2;update_predb\033\\"' 
+	$TMUXCMD selectp -t 0
+	$TMUXCMD splitw -v -p 75 'printf "\033]2;sphinx\033\\"' 
+	$TMUXCMD splitw -v -p 67 'printf "\033]2;update_missing_movie_info\033\\"' 
+	$TMUXCMD selectp -t 0
+    $TMUXCMD splitw -h -p 50 'printf "\033]2;update_tv\033\\"' 
+	$TMUXCMD selectp -t 2
+    $TMUXCMD splitw -h -p 50 'printf "\033]2;delete_parts\033\\"' 
+	$TMUXCMD selectp -t 4
+    $TMUXCMD splitw -h -p 50 'printf "\033]2;optimize\033\\"' 
+	
     $TMUXCMD new-window -n post1a 'printf "\033]2;postprocessing[01]\033\\"'
     $TMUXCMD selectp -t 0
     $TMUXCMD splitw -v -p 88 'printf "\033]2;postprocessing[03]\033\\"'
@@ -134,6 +134,14 @@ else
     $TMUXCMD splitw -v -p 75 'printf "\033]2;processTheTVDB\033\\"'
     $TMUXCMD splitw -v -p 67 'printf "\033]2;processBooks2\033\\"'
     $TMUXCMD splitw -v -p 50 'printf "\033]2;processUnwanted\033\\"'
+	
+	$TMUXCMD new-window -n other2 'printf "\033]2;Remove_Crap_Releases\033\\"'
+	$TMUXCMD selectp -t 0
+    $TMUXCMD splitw -h -p 66 'printf "\033]2;Afly_PreDB\033\\"'
+    $TMUXCMD selectp -t 1
+    $TMUXCMD splitw -h -p 50 'printf "\033]2;Fix_Release_Names\033\\"'
+	
+   
 
     if [[ $USE_HTOP == "true" ]]; then
         $TMUXCMD new-window -n htop '$HTOP'

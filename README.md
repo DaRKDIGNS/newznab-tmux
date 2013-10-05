@@ -1,3 +1,19 @@
+I have forked jonnyboys newznab-tmux as he and the dev team have moved to another project (https://github.com/nZEDb/nZEDb). I will try as much as i can to maintain and improve these tmux scripts, where possible and needed, as they are a valuable addendum to newznab+.
+Support is given on irc.synirc.net #newznab-tmuxd channel and also on original newznab-tmux channel.
+
+I started adapting some of more interesting scripts from nZEDb, but they require tempering with newznab database, so use them at your own risk. Any update to nn+ db could render them useless. Scripts require PHP version > 5.3.10
+There is a test folder in main tmux folder. In that folder you will find three different folders, /db_update/, /initial_setup/ and /predb_dump/. When you are done with initial setup and before you run start.sh for the first time, do the following:
+
+1. Import db.sql from db_update folder into newznab database,
+
+2. Import create_prehash_table.sql from initial_setup folder, be aware that this WILL delete your existing prehash table.
+
+3. OPTIONAL: If you want to populate your prehash table with more than 5 million rows of pre data, run commands from import_predb.txt in mysql. Predb dump can be downloaded from  https://mega.co.nz/#!xggDlBSC!ZDMDPVzbFY_MrzkWqX2EIFgIX8dV0vBkyQ_RF4SAb1A. If you already have prehash table created by aflys init.php, you will need to run commands from clean_duplicates_predb.txt before you run import_predb.txt
+
+
+
+Below is the original readme of newznab-tmux, with changes related to my git and removal of donation links:
+
 # Newznab-tmux
 
  * Screen shots identifying each pane and the process it runs are located at the bottom of this page.
@@ -24,7 +40,7 @@
 
   ```bash
   cd /var/www/newznab/misc/update_scripts/nix_scripts/
-  git clone https://github.com/jonnyboy/newznab-tmux.git tmux
+  git clone https://github.com/DariusIII/newznab-tmux.git tmux
   cd tmux
   ```  
 
@@ -103,10 +119,14 @@
  * These scripts include scripts written by [kevin123's](https://github.com/kevinlekiller), [itandrew's](https://github.com/itandrew/Newznab-InnoDB-Dropin), [tmux-powerline](https://github.com/erikw/tmux-powerline), [thewtex](https://github.com/thewtex/tmux-mem-cpu-load), [cj](https://github.com/NNScripts/nn-custom-scripts) and [\_zoggy\_](http://zoggy.net/tvrage-latest.sql).
 
 <hr>
- * If you find these scripts useful and would like to show your support or just buy me a beer, please use one of the donation links below. Donations are greatly appreciated. Thank you
+If you want to donate please click on donate button
 
-<a style="float:right;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=N4AJV5FHZDBFE"><img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="PayPal - The safer, easier way to pay online!" /></a>
-<a href='http://www.pledgie.com/campaigns/18980'><img alt='Click here to lend your support to: Newznab-tmux and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/18980.png?skin_name=chrome' border='0' /></a>
+<a style="float:right;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=7MQLC6ZLSQMKE"><img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="PayPal - The safer, easier way to pay online!" /></a>
+<a href='http://www.pledgie.com/campaigns/21167'><img alt='Click here to lend your support to: Newznab-tmux continued and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/21167.png?skin_name=chrome' border='0' /></a>
+
+
+
+
 
 <hr>
 ![Newznab-tmux](https://raw.github.com/jonnyboy/newznab-tmux/master/image/newznab-tmux-1.png)

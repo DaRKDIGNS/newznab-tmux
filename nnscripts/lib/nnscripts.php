@@ -181,7 +181,7 @@ abstract class NNScripts
         );
 
         // Try to read the ini file
-        $settingsFile = "settings.ini";
+        $settingsFile = "/settings.ini";
         $iniArray = $this->parseIniFile( $settingsFile, true );
         
         // Parse the "global" settings

@@ -72,13 +72,6 @@ if ! grep -q '//$this->processUnknownCategory();' "$NEWZPATH/www/lib/postprocess
 	$SED -i -e 's/$this->processUnknownCategory();/\/\/$this->processUnknownCategory();/' $NEWZPATH/www/lib/postprocess.php
 fi
 
-#edit cleanup scripts
-if [[ $CLEANUP_EDIT  == "true" ]]; then
-	$SED -i -e 's/^$echo =.*$/$echo = false;/' $TESTING_PATH/update_parsing.php
-	$SED -i -e 's/^$limited =.*$/$limited = false;/' $TESTING_PATH/update_parsing.php
-	$SED -i -e 's/^$echo =.*$/$echo = false;/' $TESTING_PATH/update_cleanup.php
-	$SED -i -e 's/^$limited =.*$/$limited = false;/' $TESTING_PATH/update_cleanup.php
-fi
 
 #edit powerprocess.php
 if [[ $FIX_POSIX  == "true" ]]; then
@@ -95,17 +88,9 @@ fi
 #attempt to get english only from IMDB
 if [[ $EN_IMDB == "true" ]]; then
 	$SED -i -e 's/akas.imdb/www.imdb/g' $NEWZPATH/www/lib/movie.php
-	$SED -i -e 's/akas.imdb/www.imdb/g' $TESTING_PATH/update_parsing.php
 	$SED -i -e 's/curl_setopt($ch, CURLOPT_URL, $url);/curl_setopt($ch, CURLOPT_URL, $url);\
 	$header[] = "Accept-Language: en-us";\
 	curl_setopt($ch, CURLOPT_HTTPHEADER, $header);/' $NEWZPATH/www/lib/util.php
-fi
-
-#import kevin123's category.php
-if [[ $PARSING_MOD == "true" ]]; then
-	cd $DIR"/kevin123"
-	cp -f categorymod.php $NEWZPATH/www/lib/
-	cd $DIR
 fi
 
 #import kevin123's category.php and backfill.php
@@ -173,9 +158,9 @@ do
 	$SED -i -e "s/\$tmpPath = \$this->site->tmpunrarpath;/\$tmpPath = \$this->site->tmpunrarpath; \\
 		\$tmpPath .= '1\/tmp$c';/g" $DIR/bin/temp/postprocess$c.php
 	if [[ $c -eq 1 ]]; then
-		$SED -i -e 's/order by r.postdate desc limit %d.*$/order by r.guid desc limit %d ", ($maxattemptstocheckpassworded + 1) * -1, $numtoProcess));/g' $DIR/bin/temp/postprocess$c.php
+		$SED -i -e 's/order by r.postdate desc limit %d.*$/order by r.guid desc limit %d ", ($maxattemptstocheckpassworded + 1) * -1, $numtoProcess);/g' $DIR/bin/temp/postprocess$c.php
 	else
-		$SED -i -e "s/order by r.postdate desc limit %d.*\$/order by r.guid asc limit %d, %d \", (\$maxattemptstocheckpassworded + 1) * -1, $c * 100, \$numtoProcess));/g" $DIR/bin/temp/postprocess$c.php
+		$SED -i -e "s/order by r.postdate desc limit %d.*\$/order by r.guid asc limit %d, %d \", (\$maxattemptstocheckpassworded + 1) * -1, $c * 100, \$numtoProcess);/g" $DIR/bin/temp/postprocess$c.php
 	fi
 	$SED -i -e "s/PostPrc : Performing additional post processing.*\$/PostPrc : Performing additional post processing by guid on \".\$rescount.\" releases, starting at $d ...\\n\";/g" $DIR/bin/temp/postprocess$c.php
 	$SED -i -e "s/\/\/echo \"PostPrc : Fetching/echo \"PostPrc : Fetching/g" $DIR/bin/temp/postprocess$c.php
@@ -193,12 +178,12 @@ for (( c=17; c<=32; c++ ))
 do
 	d=$((($c - 1) * 100))
 	cp $NEWZPATH/www/lib/postprocess.php $DIR/bin/temp/postprocess$c.php
-	$SED -i -e "s/PostProcess/PostProcess$c/g" $DIR/bin/temp/postprocess$c.php
+	$SED -i -e "s/PostProcess/PostProcess$c/g" $DIR/bin/temp/postprocess$c.php 
 	$SED -i -e "s/echo \$iteration.*$/echo \$iteration --.\"    \".\$rel['ID'].\" : \".\$rel['name'].\"\\\n\";/" $DIR/bin/temp/postprocess$c.php
 	$SED -i -e "s/processAdditional/processAdditional$c/g" $DIR/bin/temp/postprocess$c.php
 	$SED -i -e "s/\$tmpPath = \$this->site->tmpunrarpath;/\$tmpPath = \$this->site->tmpunrarpath; \\
 		\$tmpPath .= '1\/tmp$c';/g" $DIR/bin/temp/postprocess$c.php
-	$SED -i -e "s/order by r.postdate desc limit %d.*\$/order by r.guid asc limit %d, %d \", (\$maxattemptstocheckpassworded + 1) * -1, ($c + 16) * 100, \$numtoProcess));/g" $DIR/bin/temp/postprocess$c.php
+	$SED -i -e "s/order by r.postdate desc limit %d.*\$/order by r.guid asc limit %d, %d \", (\$maxattemptstocheckpassworded + 1) * -1, ($c + 16) * 100, \$numtoProcess);/g" $DIR/bin/temp/postprocess$c.php
 	$SED -i -e "s/PostPrc : Performing additional post processing.*\$/PostPrc : Performing additional post processing by guid on \".\$rescount.\" releases, starting at $d ...\\n\";/g" $DIR/bin/temp/postprocess$c.php
 	$SED -i -e "s/\/\/echo \"PostPrc : Fetching/echo \"PostPrc : Fetching/g" $DIR/bin/temp/postprocess$c.php
 	if [[ $USE_TWO_NNTP == "true" ]] && [[ $USE_TWO_PP == "true" ]]; then

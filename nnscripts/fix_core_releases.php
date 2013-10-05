@@ -1,6 +1,6 @@
 <?php
 /**
- * Fix mallformed android releases
+ * Fix CORE releases named "Keymaker Windows-CORE" in the category "PC > 0day"
  *
  * @author    NN Scripts
  * @license   http://opensource.org/licenses/MIT MIT License
@@ -21,15 +21,15 @@ require_once(WWW_DIR ."/lib/sphinx.php");
 
 
 /**
- * Remove releases which do not match black or whitelists
+ * Fix CORE releases
  */
-class fix_android_releases extends NNScripts
+class fix_core_releases extends NNScripts
 {
     /**
      * The script name
      * @var string
      */
-    protected $scriptName = 'Fix malformed android releases';
+    protected $scriptName = 'Fix CORE releases in "PC >0day"';
     
     /**
      * The script version
@@ -86,7 +86,7 @@ class fix_android_releases extends NNScripts
      */
     public function fix()
     {
-        // Get a list of the active groups with theire regexes
+        // Get the releases to check
         $releases = $this->getReleases();
         foreach( $releases AS $release )
         {
@@ -96,7 +96,7 @@ class fix_android_releases extends NNScripts
         // No releases to fix
         if( false === $this->fixed )
         {
-            $this->display( "No android releases to fix". PHP_EOL );
+            $this->display( "No CORE releases to fix". PHP_EOL );
         }
     }
     
@@ -108,12 +108,12 @@ class fix_android_releases extends NNScripts
      */
     protected function getReleases()
     {
-        $sql = "SELECT r.ID, r.name,
-                REPLACE(rf.name, '.apk', '') AS filename
+        $sql = "SELECT r.ID, r.name, uncompress(rn.nfo) AS nfo
                 FROM releases r
-                LEFT JOIN releasefiles rf ON (rf.releaseID = r.ID)
-                WHERE r.name REGEXP '^[v]?[0-9]+([\\s\\.][0-9]+)+(-(Game|Pro))?-AnDrOiD$'";
-        if( null !== $this->settings['limit'] )
+                INNER JOIN releasenfo rn ON (rn.releaseID = r.ID)
+                WHERE r.searchname = ' Keymaker Windows-CORE'
+                AND r.categoryID = 4010";
+        if( is_numeric( $this->settings['limit'] ) && 0 < $this->settings['limit'] )
         {
             $sql .= sprintf( ' AND r.adddate >= "%s" - INTERVAL %s HOUR', $this->settings['now'], $this->settings['limit'] );
         }                     
@@ -135,22 +135,27 @@ class fix_android_releases extends NNScripts
     {
         // Init
         $this->fixed = false;
-        
-        // Build the check regex
-        $regex = sprintf( '/%s$/i',preg_quote( $release['name'] ) );
-        if( preg_match( $regex, $release['filename'] ) )
+
+	// Loop all lines to find the one matching the softwarename
+	$regex = '/[\s]([a-z0-9\.\s\+_-])*?\*INCL\.KEYMAKER\*/i';
+        foreach( explode("\n", $release['nfo']) AS $line )
         {
-            // Update
-            $this->fixed = true;
-            $this->display( sprintf( 'Fixing release: %s'. PHP_EOL, $release['filename'] ) );
-            
-            $updateSql = sprintf(
-                'UPDATE releases r SET r.name = %s, r.searchname = %s WHERE r.id = %d',
-                $this->db->escapeString( str_replace( '.', ' ', $release['filename'] ) ),
-                $this->db->escapeString( $release['filename'] ),
-                (int)$release['ID']
-            );
-            $this->db->query( $updateSql );
+            if( preg_match( $regex, $line, $matches ) )
+            {
+                // Update
+                $this->fixed = true;
+
+                $title = trim( $matches[0] ) .' - CORE';
+                $this->display( sprintf( 'Fixing release: %s'. PHP_EOL, $title ) );
+
+                $updateSql = sprintf(
+                    'UPDATE releases r SET r.name = %s, r.searchname = %s WHERE r.id = %d',
+                    $this->db->escapeString( str_replace( '.', ' ', $title ) ),
+                    $this->db->escapeString( $title ),
+                    (int)$release['ID']
+                );  
+                $this->db->query( $updateSql );
+            }
         }
     }
 }
@@ -161,11 +166,10 @@ try
     // Init
     $sphinx = new Sphinx();
 
-    // Load the blacklistReleases class
-    $blr = new fix_android_releases();
-    $blr->fix();
-
+    // Load the fix_core_releases class
+    $fcr = new fix_core_releases();
+    $fcr->fix();
+	
 } catch( Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
-
 }
