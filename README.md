@@ -1,3 +1,5 @@
+# This is no longer maintained, please use the version maintained by [Darius](https://github.com/DariusIII/newznab-tmux).
+
 # Newznab-tmux
 
  * Screen shots identifying each pane and the process it runs are located at the bottom of this page.
